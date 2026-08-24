@@ -6,6 +6,7 @@ ARG CACHEBUST=1
 ARG AUDIVERIS_VERSION=5.4-alpha-3
 
 # Update package list and install build dependencies
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     rm -rf /var/lib/apt/lists/* && \
     apt-get update && \
     apt-get install -y \
@@ -17,6 +18,7 @@ ARG AUDIVERIS_VERSION=5.4-alpha-3
 WORKDIR /app/audiveris
 
 # Clone and build Audiveris
+RUN --mount=type=cache,target=/root/.gradle,sharing=locked \
     git clone https://github.com/Audiveris/audiveris.git . && \
     git checkout ${AUDIVERIS_VERSION} && \
     ./gradlew build -x test && \
@@ -29,6 +31,7 @@ WORKDIR /app/audiveris
 FROM eclipse-temurin:21-jdk
 
 # Install runtime dependencies
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     rm -rf /var/lib/apt/lists/* && \
     apt-get update && \
     apt-get install -y \
@@ -64,6 +67,7 @@ WORKDIR /app/api
 
 # Install Python dependencies from requirements.txt
 COPY requirements.txt ./
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     python3 -m pip install --break-system-packages -r requirements.txt
 
 # Copy API code and entry script last (changes most frequently)
